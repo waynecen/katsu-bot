@@ -5,9 +5,21 @@ const { token } = require('./config.json');
 // Create a new client instance
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
+const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
+
+// Event File Handler
+for (const file of eventFiles) {
+	const event = require(`./events/${file}`);
+	if (event.once) {
+		client.once(event.name, (...args) => event.execute(...args));
+	} else {
+		client.on(event.name, (...args) => event.execute(...args));
+	}
+}
+
 client.commands = new Collection();
 
-// Retrieve command files, readdirSync is array of file names
+// Command File Handler
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
